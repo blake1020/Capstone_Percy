@@ -1,0 +1,13 @@
+/* src/components/CharacterPage.css */
+
+.character-page {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .carousel {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  

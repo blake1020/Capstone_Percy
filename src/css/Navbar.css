@@ -1,0 +1,35 @@
+/* Navbar.css */
+
+.navbar {
+    background-color: green; /* Green background for the navbar */
+    width: 100%; /* Ensure the navbar spans the full width of the page */
+    /* padding: 10px 20px; Padding around the navbar items */
+  }
+  
+  .navbar-container {
+    display: flex; /* Use Flexbox for layout */
+    justify-content: space-around; /* Evenly space the items across the navbar */
+    align-items: center; /* Center align items vertically */
+    
+  }
+  
+  .navbar-link {
+    text-decoration: none; /* Remove underline from links */
+    font-size: 1.2rem; /* Font size for the links */
+    padding: 0 15px; /* Horizontal padding around each link */
+  }
+  
+  .navbar-link:hover {
+    color: #F7E03C;
+    text-decoration: underline; /* Underline text on hover */
+  }
+  
+  .navbar a {
+    color: #F5F5F5; /* Blue text color for all anchor tags in the navbar */
+    text-decoration: none; /* Remove underline from anchor tags */
+  }
+  
+  .navbar a:hover {
+    text-decoration: underline; /* Add underline on hover */
+  }
+  
