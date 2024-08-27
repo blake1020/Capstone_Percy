@@ -25,11 +25,29 @@ function App() {
   const [selectedReviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  //call api for book list
+  const [bookList, setBookList] = useState([]);
 
   const handleBookChange = (event) => {
     setSelectedBook(event.target.value);
   };
+  //Grab bookList for all components to pass down
 
+  // useEffect(() => {
+  //   const fetchBooks = async () => {
+  //     try {
+  //       const response = await axios.get(`${API_URL}/books`);
+  //       setBookList(response.data);
+  //       console.log(response.data);
+  //     } catch (error) {
+  //       console.error("Error fetching book list", error);
+  //       setError("Failed to load bookList");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchBooks();
+  // }, []);
   //grab mythical creatures
   useEffect(() => {
     const fecthMythicalCretures = async () => {

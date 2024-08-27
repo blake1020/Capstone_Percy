@@ -1,68 +1,72 @@
 import React, { useState, useEffect } from "react";
 import DropDown from "./DropDown";
+import axios from "axios";
 // //import temp book covers
 // import lightningThiefCover from '../src/app/assets/images/percy-jackson-lightning.jpg'
 // import seaOfMonsters from '../src/app/assest/images/percy-jackson-sea-of-monsters.jpg'
 
 // Hardcoded book reviews data til database fixed
-const reviewsData = {
-  "1": [
-    {
-      reviewerName: "John Doe",
-      rating: "Fantastic",
-      content:
-        "An exciting start to the series with a fantastic blend of action and mythology.",
-    },
-    {
-      reviewerName: "Jane Smith",
-      rating: "Great",
-      content:
-        "The character development is top-notch, making you care deeply about the protagonists.",
-    },
-  ],
-  "2": [
-    {
-      reviewerName: "Alice Brown",
-      rating: "Great",
-      content:
-        "A thrilling continuation of the story with even more intense adventures and twists.",
-    },
-    {
-      reviewerName: "Bob Johnson",
-      rating: "Okay",
-      content:
-        "The plot thickens and the stakes get higher, keeping readers on the edge of their seats.",
-    },
-  ],
-  "3": [
-    {
-      reviewerName: "Charlie Davis",
-      rating: "Fantastic",
-      content:
-        "An epic conclusion to the initial trilogy with plenty of surprises and resolutions.",
-    },
-    {
-      reviewerName: "Dana Lee",
-      rating: "Great",
-      content:
-        "This book provides many memorable moments and a satisfying end to the series.",
-    },
-  ],
-};
+// const reviewsData = {
+//   "1": [
+//     {
+//       reviewerName: "John Doe",
+//       rating: "Fantastic",
+//       content:
+//         "An exciting start to the series with a fantastic blend of action and mythology.",
+//     },
+//     {
+//       reviewerName: "Jane Smith",
+//       rating: "Great",
+//       content:
+//         "The character development is top-notch, making you care deeply about the protagonists.",
+//     },
+//   ],
+//   "2": [
+//     {
+//       reviewerName: "Alice Brown",
+//       rating: "Great",
+//       content:
+//         "A thrilling continuation of the story with even more intense adventures and twists.",
+//     },
+//     {
+//       reviewerName: "Bob Johnson",
+//       rating: "Okay",
+//       content:
+//         "The plot thickens and the stakes get higher, keeping readers on the edge of their seats.",
+//     },
+//   ],
+//   "3": [
+//     {
+//       reviewerName: "Charlie Davis",
+//       rating: "Fantastic",
+//       content:
+//         "An epic conclusion to the initial trilogy with plenty of surprises and resolutions.",
+//     },
+//     {
+//       reviewerName: "Dana Lee",
+//       rating: "Great",
+//       content:
+//         "This book provides many memorable moments and a satisfying end to the series.",
+//     },
+//   ],
+// };
 
 // Percy Jackson book titles
-const bookTitles = {
-  "1": "The Lightning Thief",
-  "2": "The Sea of Monsters",
-  "3": "The Titan's Curse",
-};
+// const bookTitles = {
+//   "1": "The Lightning Thief",
+//   "2": "The Sea of Monsters",
+//   "3": "The Titan's Curse",
+// };
 
 // Ratings options
 const ratings = ["Fantastic", "Great", "Okay", "Bad", "Terrible"];
 
+const API_URL = "http://localhost:3002";
+
 function BookReviewPage() {
   const [selectedBook, setSelectedBook] = useState("");
-
+  const [bookList, setBookList] = useState([]);
+  const [selectedBookDetails, setSelectedBookDetails] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -73,21 +77,52 @@ function BookReviewPage() {
   const [reviews, setReviews] = useState([]);
   const [reviewContent, setReviewContent] = useState("");
 
+  //editing useState
+  const [isEditing, setIsEditing] = useState(false);
+  const [editReviewContent, setEditReviewContent] = useState("");
+  const [editReviewId, setEditReviewId] = useState("");
+
   // Simulate fetching book list data -CONVERT TO DATA BASE
-  const bookList = [
-    { id: "1", title: "The Lightning Thief" },
-    { id: "2", title: "The Sea of Monsters" },
-    { id: "3", title: "The Titan's Curse" },
-  ];
+  // const bookList = [
+  //   { id: "1", title: "The Lightning Thief" },
+  //   { id: "2", title: "The Sea of Monsters" },
+  //   { id: "3", title: "The Titan's Curse" },
+  // ];
+
+  //Book API Call
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/books`);
+        setBookList(response.data);
+        console.log("Book array", response.data);
+      } catch (error) {
+        console.error("Error fetching book list", error);
+        setError("Failed to load bookList");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBooks();
+  }, []);
 
   useEffect(() => {
     if (selectedBook) {
-      const fetchReviews = () => {
+      const fetchBookDetails = async () => {
         setLoading(true);
         try {
+          `${API_URL}/books/${selectedBook}`;
+          const response = await axios.get(
+            `${API_URL}/reviews/${selectedBook}/reviews`
+          );
+          setSelectedBookDetails(response.data);
           // Simulating fetching data from the backend
-          const bookReviews = reviewsData[selectedBook] || [];
-          setReviews(bookReviews);
+          // const bookReviews = reviewsData[selectedBook] || [];
+          setReviews(response.data.reviews || []);
+          console.log(
+            `Fetching details for book with ID: ${selectedBook}`,
+            response.data
+          );
         } catch (error) {
           setError("Failed to load reviews");
         } finally {
@@ -95,12 +130,14 @@ function BookReviewPage() {
         }
       };
 
-      fetchReviews();
+      fetchBookDetails();
     }
   }, [selectedBook]);
 
   const handleBookChange = (event) => {
-    setSelectedBook(event.target.value);
+    const selectedBook = event.target.value;
+    const bookId = bookList.find((book) => book.title === selectedBook)?._id;
+    setSelectedBook(bookId || "");
   };
 
   //handles sumbiting review
@@ -119,6 +156,7 @@ function BookReviewPage() {
         reviewerName: username,
         rating: userRating,
         content: reviewContent,
+        bookId: selectedBook,
       };
       setReviews([...reviews, newReview]);
       setUsername("");
@@ -128,9 +166,51 @@ function BookReviewPage() {
       alert("Please enter your name and review content.");
     }
   };
+  const handleDelete = async (reviewId) => {
+    try {
+      await axios.delete(`${API_URL}/reviews/${reviewId}`);
 
-  const selectedBookDetails = bookList.find((book) => book.id === selectedBook);
-  console.log(bookList);
+      const { data: book } = await axios.get(
+        `${API_URL}/books/${selectedBook}`
+      );
+      const upddateReviews = book.reviews.filter((id) => id !== reviewId);
+
+      await axios.patch(`${API_URL}/books/${selectedBook}`, {
+        reviews: upddateReviews,
+      });
+      setSelectedBookDetails(book);
+    } catch (error) {
+      console.error("Error deleting review", error);
+      setError("Failed to delete review");
+    }
+  };
+
+  const handleEdit = (reviewId, content) => {
+    setEditReviewId(reviewId);
+    setEditReviewContent(content);
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      await axios.patch(`${API_URL}/reviews/${editReviewId}`, {
+        content: editContent,
+      });
+      setEditReviewId(null);
+      setEditReviewContent("");
+
+      const response = await axios.get(
+        `${API_URL}/books${selectedBook}/reviews`
+      );
+      setReviews(response.data.reviews);
+    } catch (error) {
+      console.error("Error updating review:", error);
+    }
+  };
+  // const selectedBookDetails = bookList.find(
+  //   (book) => book.title === selectedBook
+  // );
+  // console.log(bookList);
 
   if (!selectedBook) {
     return (
@@ -174,7 +254,7 @@ function BookReviewPage() {
           </div>
         ) : (
           <>
-            <h1>Reviews for {bookTitles[selectedBook]}</h1>
+            <h1>Reviews for {bookList[selectedBook]}</h1>
             {selectedBookDetails && (
               <img
                 src={selectedBookDetails.cover}
@@ -226,6 +306,8 @@ function BookReviewPage() {
                     <strong>Rating: {review.rating}</strong>
                     <br />
                     <p>{review.content}</p>
+                    <button>Edit</button>
+                    <button onClick={handleDelete}>Delete</button>
                   </li>
                 ))}
               </ul>
