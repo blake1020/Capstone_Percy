@@ -35,25 +35,31 @@ function Reviews() {
 
   const handleSubmitReview = async (event) => {
     event.preventDefault();
-    if (username && reviewContent) {
+    if (userName && reviewContent) {
       const createReview = {
-        reviewerName: username,
+        reviewerName: userName,
         ratings: userRating,
         content: reviewContent,
       };
       try {
-        await axios.post(`${API_URL}/reviews`, createReview);
+        const response = await axios.post(
+          `${API_URL}/reviews/reviews`,
+          createReview
+        );
+        setReviews((prevReviews) => [response.data, ...prevReviews]);
 
-        setReviews((reviews) => {
-          [...reviews, response.data];
-        });
+        console.log("Previous Reviews", prevReviews);
+
+        // setReviews((reviews) => {
+        //   [...reviews, response.data];
+        // });
 
         setUsername("");
         setUserRating("Fantastic");
         setReviewContent("");
       } catch (error) {
-        // console.error("Error submitting review", error);
-        alert("Failed to submit the review. Please try again");
+        console.error("Error submitting review", error);
+        // alert("Failed to submit the review. Please try again");
       }
     } else {
       alert("Please enter your name and review content.");
