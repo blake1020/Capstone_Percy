@@ -48,7 +48,7 @@ function Reviews() {
         );
         setReviews((prevReviews) => [response.data, ...prevReviews]);
 
-        console.log("Previous Reviews", prevReviews);
+        // console.log("Previous Reviews", prevReviews);
 
         // setReviews((reviews) => {
         //   [...reviews, response.data];
@@ -93,6 +93,7 @@ function Reviews() {
   };
 
   const handleEdit = (reviewId, content) => {
+    console.log("Edit button clicked for review ID:", reviewId);
     setEditReviewId(reviewId);
     setEditReviewContent(content);
     setIsEditing(true);
@@ -103,16 +104,23 @@ function Reviews() {
       await axios.patch(`${API_URL}/reviews/${editReviewId}`, {
         content: editReviewContent,
       });
+
+      setReviews((prevReviews) =>
+        prevReviews.map((review) =>
+          review._id === editReviewId
+            ? { ...review, content: editReviewContent }
+            : review
+        )
+      );
+
       setEditReviewId(null);
       setEditReviewContent("");
       setIsEditing(false);
-
-      const response = await axios.get(`${API_URL}/reviews`);
-      setReviews(response.data.reviews);
     } catch (error) {
       console.error("Error updating review:", error);
     }
   };
+
   const handleCancelEdit = () => {
     setIsEditing(false);
     setEditReviewContent("");
@@ -159,14 +167,30 @@ function Reviews() {
         {reviews && reviews.length > 0 ? (
           <ul>
             {reviews.map((review) => (
-              <li key={review.id}>
+              <li key={review._id}>
                 <strong>{review.reviewerName}</strong>
                 <br /> ({review.ratings}) <p>{review.content}</p>
-                <button onClick={() => handleEdit(review.id, review.content)}>
-                  Edit
-                </button>
-                <button onClick={handleSaveEdit}>Save</button>
-                <button onClick={() => handleDelete(review._id)}>Delete</button>
+                {isEditing && editReviewId === review._id ? (
+                  <div>
+                    <textarea
+                      value={editReviewContent}
+                      onChange={(e) => setEditReviewContent(e.target.value)}
+                    />
+                    <button onClick={handleSaveEdit}>Save</button>
+                    <button onClick={handleCancelEdit}>Cancel</button>
+                  </div>
+                ) : (
+                  <div>
+                    <button
+                      onClick={() => handleEdit(review._id, review.content)}
+                    >
+                      Edit
+                    </button>
+                    <button onClick={() => handleDelete(review._id)}>
+                      Delete
+                    </button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
