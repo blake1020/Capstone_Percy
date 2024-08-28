@@ -10,6 +10,8 @@ import Reviews from "./components/Reviews";
 import CharacterCarousel from "./components/CharacterCarousel";
 import axios from "axios";
 import "../src/css/App.css";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 //import book covers
 
