@@ -26,6 +26,9 @@ function Navbar({ selectedBook, onBookChange }) {
         <Link to="/mythicalCreatures" className="navbar-link">
           Mythical Creatures
         </Link>
+        <Link to="/reviews" className="navabar-link">
+          Reviews
+        </Link>
       </div>
     </nav>
   );

@@ -6,6 +6,7 @@ import Navbar from "./app/Navbar";
 import BookReviewPage from "./components/BookReviewPage";
 import MythicalCreaturePage from "./components/MythicalCreaturePage";
 import HomePage from "./components/HomePage";
+import Reviews from "./components/Reviews";
 import CharacterCarousel from "./components/CharacterCarousel";
 import axios from "axios";
 import "../src/css/App.css";
@@ -97,6 +98,7 @@ function App() {
             element={<BookReviewPage selectedBook={selectedBook} />}
           />
           <Route path="/mythicalCreatures" element={<MythicalCreaturePage />} />
+          <Route path="/reviews" element={<Reviews />} />
         </Routes>
       </Router>
     </div>

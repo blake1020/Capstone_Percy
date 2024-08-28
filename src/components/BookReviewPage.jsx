@@ -115,7 +115,7 @@ function BookReviewPage() {
           const response = await axios.get(
             `${API_URL}/reviews/${selectedBook}/reviews`
           );
-          setSelectedBookDetails(response.data);
+          setSelectedBookDetails(response.data || []);
           // Simulating fetching data from the backend
           // const bookReviews = reviewsData[selectedBook] || [];
           setReviews(response.data.reviews || []);
@@ -150,35 +150,59 @@ function BookReviewPage() {
   const handleReviewContentChange = (event) => {
     setReviewContent(event.target.value);
   };
-  const handleSubmitReview = () => {
+  const handleSubmitReview = async (event) => {
+    event.preventDefault();
     if (username && reviewContent) {
-      const newReview = {
+      const createReview = {
         reviewerName: username,
-        rating: userRating,
+        ratings: userRating,
         content: reviewContent,
-        bookId: selectedBook,
       };
-      setReviews([...reviews, newReview]);
-      setUsername("");
-      setUserRating("Fantastic");
-      setReviewContent("");
+      try {
+        await axios.post(`${API_URL}/reviews/reviews`, createReview);
+
+        const response = await axios.get(
+          `${API_URL}/reviews/${selectedBook}/reviews`
+        );
+        setReviews(response.data.reviews || []);
+
+        setUsername("");
+        setUserRating("Fantastic");
+        setReviewContent("");
+      } catch (error) {
+        // console.error("Error submitting review", error);
+        alert("Failed to submit the review. Please try again");
+      }
     } else {
       alert("Please enter your name and review content.");
     }
   };
+
+  //runs immediately once i pick a book to view the books and the reviews
+  //delete seems to be working but is says that it failed to delete the review on the page
   const handleDelete = async (reviewId) => {
     try {
+      console.log(`Attempting to delete review with ID: ${reviewId}`);
+
       await axios.delete(`${API_URL}/reviews/${reviewId}`);
+
+      console.log(`Review ${reviewId} deleted successfully.`);
 
       const { data: book } = await axios.get(
         `${API_URL}/books/${selectedBook}`
       );
-      const upddateReviews = book.reviews.filter((id) => id !== reviewId);
-
-      await axios.patch(`${API_URL}/books/${selectedBook}`, {
-        reviews: upddateReviews,
-      });
+      console.log("Fetched updated book detail:", book);
+      setReviews(book.reviews);
       setSelectedBookDetails(book);
+
+      setError(null);
+
+      // const updateReviews = book.reviews.filter((id) => id !== reviewId);
+
+      // await axios.patch(`${API_URL}/books/${selectedBook}`, {
+      //   reviews: updateReviews,
+      // });
+      // setSelectedBookDetails(book);
     } catch (error) {
       console.error("Error deleting review", error);
       setError("Failed to delete review");
@@ -194,18 +218,23 @@ function BookReviewPage() {
   const handleSaveEdit = async () => {
     try {
       await axios.patch(`${API_URL}/reviews/${editReviewId}`, {
-        content: editContent,
+        content: editReviewContent,
       });
       setEditReviewId(null);
       setEditReviewContent("");
+      isEditing(false);
 
       const response = await axios.get(
-        `${API_URL}/books${selectedBook}/reviews`
+        `${API_URL}/books/${selectedBook}/reviews`
       );
       setReviews(response.data.reviews);
     } catch (error) {
       console.error("Error updating review:", error);
     }
+  };
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditReviewContent("");
   };
   // const selectedBookDetails = bookList.find(
   //   (book) => book.title === selectedBook
@@ -236,6 +265,11 @@ function BookReviewPage() {
     );
   }
 
+  //make new component for reviews
+  //make route to view all reviews
+  //make api call to get reviews
+  //CRUD
+
   if (loading) return <div>Loading reviews...</div>;
   if (error) return <div>Error: {error}</div>;
 
@@ -250,11 +284,11 @@ function BookReviewPage() {
       <div style={{ marginTop: "60px" }}>
         {!selectedBook ? (
           <div>
-            <h1>Book Reviews</h1>
+            <h2>Book Reviews</h2>
           </div>
         ) : (
           <>
-            <h1>Reviews for {bookList[selectedBook]}</h1>
+            <h1>Reviews for {selectedBookDetails?.title}</h1>
             {selectedBookDetails && (
               <img
                 src={selectedBookDetails.cover}
@@ -262,40 +296,42 @@ function BookReviewPage() {
                 style={{ width: "200px", height: "auto" }}
               />
             )}
-            <div>
-              <label htmlFor="username">Enter your name: </label>
-              <input
-                type="text"
-                id="username"
-                value={username}
-                onChange={handleUsernameChange}
-                placeholder="Your name"
-              />
-            </div>
-            <div>
-              <label htmlFor="rating">Rating: </label>
-              <select
-                id="rating"
-                value={userRating}
-                onChange={handleRatingChange}
-              >
-                {ratings.map((rating) => (
-                  <option key={rating} value={rating}>
-                    {rating}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="reviewContent">Your Review: </label>
-              <textarea
-                id="reviewContent"
-                value={reviewContent}
-                onChange={handleReviewContentChange}
-                placeholder="Write your review here"
-              />
-            </div>
-            <button onClick={handleSubmitReview}>Submit Review</button>
+            <form onSubmit={handleSubmitReview}>
+              <div>
+                <label htmlFor="username">Enter your name: </label>
+                <input
+                  type="text"
+                  id="username"
+                  value={username}
+                  onChange={handleUsernameChange}
+                  placeholder="Your name"
+                />
+              </div>
+              <div>
+                <label htmlFor="ratings">Ratings: </label>
+                <select
+                  id="ratings"
+                  value={userRating}
+                  onChange={handleRatingChange}
+                >
+                  {ratings.map((rating) => (
+                    <option key={rating} value={rating}>
+                      {rating}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="reviewContent">Your Review: </label>
+                <textarea
+                  id="reviewContent"
+                  value={reviewContent}
+                  onChange={handleReviewContentChange}
+                  placeholder="Write your review here"
+                />
+              </div>
+              <button type="submit">Submit Review</button>
+            </form>
             <h2>Book Reviews</h2>
             {reviews.length > 0 ? (
               <ul>
@@ -306,8 +342,15 @@ function BookReviewPage() {
                     <strong>Rating: {review.rating}</strong>
                     <br />
                     <p>{review.content}</p>
-                    <button>Edit</button>
-                    <button onClick={handleDelete}>Delete</button>
+                    <button
+                      onClick={() => handleEdit(review.id, review.content)}
+                    >
+                      Edit
+                    </button>
+                    <button onClick={handleSaveEdit}>Save</button>
+                    <button onClick={() => handleDelete(review._id)}>
+                      Delete
+                    </button>
                   </li>
                 ))}
               </ul>
