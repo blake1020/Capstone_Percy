@@ -15,8 +15,10 @@ function Reviews() {
   const [editReviewContent, setEditReviewContent] = useState("");
   const [editReviewId, setEditReviewId] = useState("");
 
+  //grab all reviews
   useEffect(() => {
     const fetchReviews = async () => {
+      setLoading(true);
       try {
         const response = await axios.get(`${API_URL}/reviews`);
         setReviews(response.data);
@@ -24,10 +26,150 @@ function Reviews() {
       } catch (error) {
         console.error("Error fetching review list", error);
         setError("Failed to load Review");
+      } finally {
+        setLoading(false);
       }
     };
-  });
-  return <div>Reviews</div>;
+    fetchReviews();
+  }, []);
+
+  const handleSubmitReview = async (event) => {
+    event.preventDefault();
+    if (username && reviewContent) {
+      const createReview = {
+        reviewerName: username,
+        ratings: userRating,
+        content: reviewContent,
+      };
+      try {
+        await axios.post(`${API_URL}/reviews`, createReview);
+
+        setReviews((reviews) => {
+          [...reviews, response.data];
+        });
+
+        setUsername("");
+        setUserRating("Fantastic");
+        setReviewContent("");
+      } catch (error) {
+        // console.error("Error submitting review", error);
+        alert("Failed to submit the review. Please try again");
+      }
+    } else {
+      alert("Please enter your name and review content.");
+    }
+  };
+  //handles sumbiting review
+  const handleUserNameChange = (event) => {
+    setUserName(event.target.value);
+  };
+  const handleRatingChange = (event) => {
+    setUserRating(event.target.value);
+  };
+  const handleReviewContentChange = (event) => {
+    setReviewContent(event.target.value);
+  };
+
+  const handleDelete = async (reviewId) => {
+    try {
+      console.log(`Attempting to delete review with ID: ${reviewId}`);
+
+      await axios.delete(`${API_URL}/reviews/${reviewId}`);
+
+      console.log(`Review ${reviewId} deleted successfully.`);
+
+      setReviews(reviews.filter((review) => review._id !== reviewId));
+      setError(null);
+    } catch (error) {
+      console.error("Error deleting review", error);
+      setError("Failed to delete review");
+    }
+  };
+
+  const handleEdit = (reviewId, content) => {
+    setEditReviewId(reviewId);
+    setEditReviewContent(content);
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      await axios.patch(`${API_URL}/reviews/${editReviewId}`, {
+        content: editReviewContent,
+      });
+      setEditReviewId(null);
+      setEditReviewContent("");
+      setIsEditing(false);
+
+      const response = await axios.get(`${API_URL}/reviews`);
+      setReviews(response.data.reviews);
+    } catch (error) {
+      console.error("Error updating review:", error);
+    }
+  };
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditReviewContent("");
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleSubmitReview}>
+        <div>
+          <label htmlFor="username">Enter your name: </label>
+          <input
+            type="text"
+            id="username"
+            value={userName}
+            onChange={handleUserNameChange}
+            placeholder="Your name"
+          />
+        </div>
+        <div>
+          <label htmlFor="ratings">Ratings: </label>
+          <select id="ratings" value={userRating} onChange={handleRatingChange}>
+            {ratings.map((rating) => (
+              <option key={rating} value={rating}>
+                {rating}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="reviewContent">Your Review: </label>
+          <textarea
+            id="reviewContent"
+            value={reviewContent}
+            onChange={handleReviewContentChange}
+            placeholder="Write your review here"
+          />
+        </div>
+        <button type="submit">Submit Review</button>
+      </form>
+
+      {/* Displaying the Reviews */}
+      <div>
+        <h2>Reviews</h2>
+        {reviews && reviews.length > 0 ? (
+          <ul>
+            {reviews.map((review) => (
+              <li key={review.id}>
+                <strong>{review.reviewerName}</strong>
+                <br /> ({review.ratings}) <p>{review.content}</p>
+                <button onClick={() => handleEdit(review.id, review.content)}>
+                  Edit
+                </button>
+                <button onClick={handleSaveEdit}>Save</button>
+                <button onClick={() => handleDelete(review._id)}>Delete</button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No reviews yet.</p>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default Reviews;
