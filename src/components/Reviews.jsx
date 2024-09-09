@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import "../css/Review.css";
 
 const API_URL = "http://localhost:3002";
 const ratings = ["Fantastic", "Great", "Okay", "Bad", "Terrible"];
@@ -128,7 +129,8 @@ function Reviews() {
 
   return (
     <div>
-      <form onSubmit={handleSubmitReview}>
+      <h2>Write a Review</h2>
+      <form id="review-form" onSubmit={handleSubmitReview}>
         <div>
           <label htmlFor="username">Enter your name: </label>
           <input

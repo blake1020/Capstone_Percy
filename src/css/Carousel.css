@@ -2,11 +2,30 @@
 @import "~slick-carousel/slick/slick-theme.css"; */
 
 .character-carousel {
+  position: relative;
   width: 100%;
   margin: 0 auto;
   max-width: 1200px;
   overflow: hidden;
 
+}
+.slick-prev, .slick-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: block !important;
+  z-index: 9999;
+  width: 50px;
+  height: 50px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  border: 2 px solid red;
+  color: #4B4B4B;
+  font-size: 40px;
+  line-height: 50px;
+  text-align: center;
+  cursor: pointer;
+  z-index: 9999;
 }
 .slick-slide {
   display: flex;
@@ -21,9 +40,27 @@
   bottom: -30px;
 }
 
-.slick-prev, .slick-next {
-  z-index: 1;
+
+.slick-prev {
+  left: 15px
 }
+
+.slick-next {
+  right: 15px
+}
+
+.slick-prev:before, .slick-next:before {
+  content: '⬅️';
+}
+
+.slick-prev:before {
+  content: '⬅️';
+}
+
+.slick-next:before {
+  content: '➡️';
+}
+
 
 .carousel {
     display: flex;

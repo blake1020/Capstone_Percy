@@ -13,6 +13,12 @@ const CharacterCard = ({ characters }) => {
       <div className="card-inner">
         <div className="card-front">
           <h3>{characters.name}</h3>
+          <br />
+          <p>
+            <strong>Ability:</strong>
+          </p>
+          <br />
+          <p></p>
         </div>
         <div className="card-back">
           <p>
@@ -21,6 +27,9 @@ const CharacterCard = ({ characters }) => {
           <p>
             <strong>Series Appeared In:</strong>{" "}
             {characters.seriesAppearedIn.join("")}
+          </p>
+          <p>
+            <strong>Residence: </strong>
           </p>
         </div>
       </div>

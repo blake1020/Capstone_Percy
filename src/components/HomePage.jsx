@@ -7,7 +7,14 @@ import book3Cover from "../assests/images/percy-jackson-the-titans-curse.jpg";
 import book4Cover from "../assests/images/percy-jackson-battle-of-labyrinth.jpg";
 import book5Cover from "../assests/images/percy-jackson-the-last-olympian.jpg";
 
+const API_URL = "http://localhost:3002";
+
 function HomePage() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [flippedBook, setFlippedBook] = useState(null);
+  const [displayBooks, setDisplayBooks] = useState([]);
+
   const [books] = useState([
     {
       id: 1,
@@ -40,26 +47,26 @@ function HomePage() {
         "Percy Jackson faces his most critical challenge as the prophecy foretold in his youth comes to fruition. With Kronos and his Titan army poised to attack Mount Olympus, Percy leads the demigods in a desperate battle to defend New York City and the heart of the Olympian realm. As the conflict escalates, Percy grapples with his role in the prophecy, the true nature of his powers, and his destiny. Allies are tested, betrayals are revealed, and crucial decisions must be made. The story culminates in a climactic confrontation that will determine the fate of the gods and the future of the world, with Percy discovering his own strength and the power of sacrifice.",
     },
   ]);
-  const fetchBooks = async () => {
-    //fetch reviews
-    const res = await axios.get("http://localhost:3002/books");
-    //set to state
-    console.log(res);
-  };
-  fetchBooks();
-
-  // const [loading, setLoading] = useState(true)
-  // const [error, setError] = useState(null)
-  const [flippedBook, setFlippedBook] = useState(null);
 
   const handleClick = (id) => {
     setFlippedBook(flippedBook === id ? null : id);
   };
 
   useEffect(() => {
-    //fetch api data
-    axios.get("");
-  });
+    const fetchBooks = async () => {
+      try {
+        const response = axios.get(`${API_URL}/books`);
+        setDisplayBooks(response.data);
+        setLoading(false);
+        console.log("Response books from API");
+      } catch (error) {
+        console.error("Error fetching books:", error);
+        setError("Failed to load books");
+        setLoading(false);
+      }
+    };
+    fetchBooks();
+  }, []);
   return (
     <div className="book-container">
       {books.map((book) => (

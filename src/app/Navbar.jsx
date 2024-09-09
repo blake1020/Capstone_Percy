@@ -29,6 +29,12 @@ function Navbar({ selectedBook, onBookChange }) {
         <Link to="/reviews" className="navabar-link">
           Reviews
         </Link>
+        <Link to="/login" className="navbar-link">
+          <button className="navbar-button">Login</button>
+        </Link>
+        <Link to="/register" className="navbar-link">
+          <button className="navbar-button">Register</button>
+        </Link>
       </div>
     </nav>
   );

@@ -12,6 +12,7 @@ import axios from "axios";
 import "../src/css/App.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import RegisterPage from "./components/RegisterPage";
 
 //import book covers
 
@@ -30,7 +31,11 @@ function App() {
   const [error, setError] = useState(null);
   //call api for book list
   const [bookList, setBookList] = useState([]);
+  const [userRole, setUserRole] = useState("user");
 
+  const login = (role) => {
+    setUserRole(role);
+  };
   const handleBookChange = (event) => {
     setSelectedBook(event.target.value);
   };
@@ -88,6 +93,7 @@ function App() {
   return (
     <div className="app-container">
       <Router>
+        <button></button>
         <Navbar selectedBook={selectedBook} onBookChange={handleBookChange} />
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -101,6 +107,7 @@ function App() {
           />
           <Route path="/mythicalCreatures" element={<MythicalCreaturePage />} />
           <Route path="/reviews" element={<Reviews />} />
+          <Route path="/register" element={<RegisterPage />} />
         </Routes>
       </Router>
     </div>
